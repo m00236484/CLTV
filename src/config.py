@@ -21,10 +21,9 @@ class Config(object):
                 f.write(str(line)+'\n')          
         else:
             raise ValueError
-        
-        
         f.close()     
-        
+        return outFile
+    
     def set_outFile(self, fileType):
         fileTime = datetime.now().strftime("%m%d%Y-%I%M%S")
         outFile = fileType + '_' + fileTime+'.txt'

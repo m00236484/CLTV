@@ -98,31 +98,28 @@ class CLTV(object):
        #outputFile = conf.set_outFile('outpu')
         conf = Config()
         data = []
-        if x <= len(self.cusLTVs.keys()):
-            #conf.writeOutput(sorted(self.cusLTVs, key=self.cusLTVs.get, reverse=True)[:x])
-            for w in sorted(self.cusLTVs, key=self.cusLTVs.get, reverse=True)[:x]:
-                datao = str(w) + "\t"+ str(self.customers.get(w).last_name) + "\t" + str('${:,.2f}'.format(self.cusLTVs[w]))
-                data.append(str(datao))
-                
-                print  str(self.customers.get(w).last_name)  , w, self.cusLTVs[w]                    
-            
-            conf.writeOutput(data) 
-            return 4 
+        topX = int(x)
+        
+            #conf.writeOutput(sorted(self.cusLTVs, key=self.cusLTVs.get, reverse=True)[:topX])
+        for w in sorted(self.cusLTVs, key=self.cusLTVs.get, reverse=True)[:x]:
+            datao = str(w) + "\t"+ str(self.customers.get(w).last_name) + "\t" + str('${:,.2f}'.format(self.cusLTVs[w]))
+            data.append(str(datao))
+            print  str(self.customers.get(w).last_name)  , w, self.cusLTVs[w]                    
+        
+        outputFile = conf.writeOutput(data)
+        print outputFile
+        return x 
         
 #class CLTVTest(unittest.TestCase):
     
 
 def main():
-    inFile = 'D:\Projects\CLTV\input\ds50Customers.txt'
-    #fileName = 'D:\Projects\CLTV\input\input.txt'
-    topX =5 
     if len(sys.argv) >= 3:
         topX = sys.argv[1]
-        inFile = sys.argv[2]
-           
+        inFile = sys.argv[2]     
     else:
         print 'Please Enter Top X Customer & Input Data '
-        #return 
+        return 
      
     analysis = CLTV(inFile)
     analysis.TopXSimpleLTVCustomers(topX)
