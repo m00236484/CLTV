@@ -1,0 +1,26 @@
+#!wing
+#!version=6.0
+##################################################################
+# Wing IDE project file                                          #
+##################################################################
+[project attributes]
+debug.launch-configs = (2,
+                        {'launch-WLQlU4ETM2eXzMcV': ({},
+        {'buildcmd': ('project',
+                      None),
+         'env': ('project',
+                 [u'']),
+         'name': 'Launch Config',
+         'pyexec': ('default',
+                    u''),
+         'pypath': ('project',
+                    []),
+         'pyrunargs': ('project',
+                       '-u'),
+         'runargs': u'',
+         'rundir': ('project',
+                    u'')})})
+proj.file-type = 'shared'
+proj.launch-config = {loc('CLTV.py'): ('custom',
+                                       (u'',
+        'launch-WLQlU4ETM2eXzMcV'))}
