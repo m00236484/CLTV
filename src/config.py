@@ -7,18 +7,25 @@ class Config(object):
         self.logName = None
         self.outPutDir = None
         self.outFile = self.set_outFile('output')
-    def writeOutput(self,data):
-        outFile = self.outFile
+    def writeOutput(self,outFile,data, isLog = None ):
+        headtext = ''
+        outTxt = ''
+        if isLog == True:
+            headtext = str(datetime.now()) +'\t'
+
         f= open(outFile,"w+")
         if type(data) == type(str()):
-            f.writelines(data)
+            outTxt = headtext + str(data)  + '\n'
+            f.writelines(outTxt)
         elif type(data) == type(dict()):
             for line in data:
-                f.write(line)
+                outTxt = headtext + str(line) + '\t'
+                f.write(outTxt)
                 f.write(data(line))
         elif type(data) == type(list()):
             for line in data:
-                f.write(str(line)+'\n')          
+                outTxt = headtext + str(line) +'\n'
+                f.write(outTxt)          
         else:
             raise ValueError
         f.close()     
@@ -38,11 +45,3 @@ class Config(object):
             os.makedirs(path)                    
         return path
     
-def main():
-    import os
-    conf = Config()
-    print conf.set_outFile('output')
-    
-
-if __name__ == '__main__':
-    main() 

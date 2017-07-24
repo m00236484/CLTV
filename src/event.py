@@ -13,6 +13,8 @@ class Event(object):
         self.eYear = None
         self.eWeek = None
         self.eYWeek = '00-99' #bad weekly data
+        self.badEventFile = ''
+        self.conf = Config()
 
     def __str__(self):
         return self.data
@@ -20,15 +22,20 @@ class Event(object):
     def getEventData(self, inEvent):
         # Return valid data
         eType = inEvent.get('type')
+        
         if eType not in ['CUSTOMER' , 'ORDER' ,'SITE_VISIT','IMAGE']:
             # write to bad Data File
-            print 'Bad Event'         
+            badevent = 'Bad Event  : Event Type dosen not recognized  : '  + eType 
+            self.conf.writeOutput(self.badEventFile , str(badevent)) 
+            self.conf.writeOutput(self.badEventFile ,  str(inEvent))
             return None
         
         event_time = self.get_event_time(inEvent.get('event_time'))
         if len(event_time) <  1:
             # write to bad Data File
-            print 'Bad Event'         
+            badevent = 'Bad Event  Event date incorrect  : '  + str(event_time) 
+            self.conf.writeOutput(self.badEventFile , str(badevent)) 
+            self.conf.writeOutput(self.badEventFile ,  str(inEvent))
             return None            
         
         data = {}    

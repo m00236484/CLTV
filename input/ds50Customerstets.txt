@@ -1,0 +1,3 @@
+[{"type":"CUSTOMERS","verb":"NEW","key":1021,"event_time":"2017-02-25T12:07:10.1010z","last_name":"Barker","adr_city":"Foxworth","adr_state":"Michigan"},
+{"type":"CUSTOMERS","verb":"NEW","key":1021,"event_time":"2017-02-25T12:07:10.1010z","last_name":"Barker","adr_city":"Foxworth","adr_state":"Michigan"},
+{"type":"CUSTOMER","verb":"NEW","key":1021,"event_time":"2017-02-25T12:07:10.1010z","last_name":"Barker","adr_city":"Foxworth","adr_state":"Michigan"}]

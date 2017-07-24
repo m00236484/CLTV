@@ -1,4 +1,5 @@
 import sys
+import os
 import json
 import unittest
 from decimal import Decimal
@@ -10,30 +11,71 @@ from config import Config
 class CLTV(object):
      
     def __init__(self, fileName):
-           
+        self.conf = Config()
+        self.event = Event()
+        
         self.customers = {}
         self.cusLTVs = {}
-        self.loadJson(fileName)
-        self.analysis()
-        self.analysis_dateFrame()
+        self.VisitsNo = 0
+        self.ordersNo = 0
+        self.badEvent = 0
+        self.events = 0 
+        self.inFile = fileName
+        self.outFile = ''
+        self.logFile = ''
+        self.badDataFile = ''
+        self.dsFile = ''
+        self.set_OutputFiles()
+        
+        # set log file to event 
+        self.event.badEventFile =  self.badDataFile
+        
+        if self.loadJson(fileName):
+                 
+            self.analysis()
+            self.analysis_dateFrame()
+            self.dataSet_analsys()
+            
+    def set_OutputFiles(self):
+          
+        self.outFile =  self.conf.set_outFile('output')   
+        self.logFile =  self.conf.set_outFile('log')   
+        self.badDataFile = self.conf.set_outFile('badFile')   
+        self.dsFile = self.conf.set_outFile('DS_Analsis')        
         
         
     def loadJson(self, fileName):
         
-        if fileName:
+        if os.path.isfile(fileName): 
             with open(fileName, 'r') as f:
-                objects = json.load(f)
-            if len(objects)>1:
-                for event in objects:
-                    self.ingest(event) 
+                try:
+                    objects = json.load(f)
+                    
+                    if len(objects)>=1:   
+                        for event in objects:
+                            self.ingest(event)
+                    else:
+                        self.conf.writeOutput(self.logFile , 'Input file is empty ###: ' + fileName , True )
+                        return False
+                    
+                except ValueError, e:
+                    print e.message  
+                    self.conf.writeOutput(self.logFile , 'Input file is empty ***  : ' + fileName , True )
+                    return False
+                                                      
         else:
-            return None
-        
+            self.conf.writeOutput(self.logFile , 'Input file dose not exists : ' + fileName , True )
+            return False
+          
+        self.conf.writeOutput(self.logFile , 'Success to read json file : ' + fileName , True )
+        return True
     def ingest(self, event):
-        data = Event().getEventData(event)
+
+        data = self.event.getEventData(event)
+        self.events += 1
         if not data:
-            return None
-            
+            self.badEvent += 1
+            return None       
         eType   = data.get('type')
         eAction = data.get('verb')
         eTime   = data.get('event_time') 
@@ -61,10 +103,11 @@ class CLTV(object):
             else:
                 if eType == 'SITE_VISIT':
                     self.customers.get(customer_id).set_customerVisit(eTime, eYWeek , 0 )
+                    self.VisitsNo += 1               
                 elif eType == 'ORDER':
                     expen = data.get('total_amount')
                     self.customers.get(customer_id).set_customerVisit(eTime, eYWeek , expen )
-                    
+                    self.ordersNo += 1 
               
     def analysis1(self):
         vistExpe = 0
@@ -78,43 +121,92 @@ class CLTV(object):
         vistExpe = 0
         wkVisit = 0
         cusCount = len(self.customers.keys())
+           
         for key  in self.customers:
             #print self.customers.get(key).totExpend
-            cusVstExpe = self.customers.get(key).totExpend / self.customers.get(key).cntVisit
-            vistExpe += cusVstExpe 
-            cusVstWklV = self.customers.get(key).cntVisit / len(self.customers.get(key).wkVisits.keys())
-            wkVisit += cusVstWklV  
+            try:
+                cusVstExpe = self.customers.get(key).totExpend / self.customers.get(key).cntVisit
+            except:
+                cusVstExpe = 0 
+                
+            vistExpe += cusVstExpe
+            try:
+                cusVstWklV = self.customers.get(key).cntVisit / len(self.customers.get(key).wkVisits.keys())
+            except:    
+                cusVstWklV = 0
+            wkVisit += cusVstWklV    
             wkCustVal = vistExpe * wkVisit
             cusLTV = 52 * wkCustVal * 10
             self.cusLTVs[key] = cusLTV
-        avrVistExpe  = vistExpe /  cusCount
-        avrWkVisit   = wkVisit / cusCount
+        try:
+            avrVistExpe  = vistExpe /  cusCount
+        except:    
+            avrVistExpe = 0 
+        try:
+            avrWkVisit   = wkVisit / cusCount
+        except:    
+            avrWkVisit = 0        
+        
         avrcusLTV    = 52 * (avrVistExpe * avrWkVisit) * 10 
     
+    def dataSet_analsys(self):
+        data = []
+        event =     'Total Events      :' + str(self.events) 
+        client =    'Total Clients     :' + str(len(self.customers.keys()))
+        Visits =    'Total Visits      :' + str(self.VisitsNo)
+        Orders =    'Total Orders      :' + str(self.ordersNo)
+        bad_event = 'Total Bad Events  :' + str(self.badEvent)
+        data.append(event)
+        data.append(client)
+        data.append(Visits)
+        data.append(Orders)
+        data.append(bad_event)  
+        outputFile = self.conf.writeOutput(self.dsFile , data)
+        
     def analysis_dateFrame(self):
         vistExpe = 0
         wkVisit = 0
         cusCount = len(self.customers.keys())
         for key  in self.customers:
             #print self.customers.get(key).totExpend
-            cusVstExpe = self.customers.get(key).totExpend / self.customers.get(key).cntVisit
+            try:
+                cusVstExpe = self.customers.get(key).totExpend / self.customers.get(key).cntVisit
+            except:    
+                cusVstExpe = 0
+                
+            
             vistExpe += cusVstExpe 
             
             firstAction = self.customers.get(key).firstAction 
             lastAction =  self.customers.get(key).lastAction
-            Weeks = (lastAction-firstAction).days / 7
-            cusVstWklV = self.customers.get(key).cntVisit / Weeks
+            
+            try:
+                Weeks = (lastAction-firstAction).days / 7
+            except:    
+                Weeks = 1  
+            try:
+                cusVstWklV = self.customers.get(key).cntVisit / Weeks
+            except:    
+                cusVstWklV = 0 
+          
             wkVisit += cusVstWklV  
             wkCustVal = vistExpe * wkVisit
             cusLTV = 52 * wkCustVal * 10
             self.cusLTVs[key] = cusLTV
-        avrVistExpe  = vistExpe /  cusCount
-        avrWkVisit   = wkVisit / cusCount
+
+        try:
+            avrVistExpe  = vistExpe /  cusCount
+        except:    
+            avrVistExpe = 0 
+        try:
+            avrWkVisit   = wkVisit / cusCount
+        except:    
+            avrWkVisit = 0
         avrcusLTV    = 52 * (avrVistExpe * avrWkVisit) * 10 
         
     def TopXSimpleLTVCustomers(self,x):
        #outputFile = conf.set_outFile('outpu')
-        conf = Config()
+        
         data = []
         topX = 0
         if int(x) <= len(self.cusLTVs.keys()):
@@ -129,7 +221,8 @@ class CLTV(object):
             data.append(str(datao))
             #print  str(self.customers.get(w).surname)  , w, self.cusLTVs[w]                    
         
-        outputFile = conf.writeOutput(data)
+             
+        outputFile = self.conf.writeOutput(self.outFile ,data)
         print 'OutPut File :' + outputFile
         return x 
         
@@ -146,7 +239,9 @@ def main():
         topX = 4 
      
     analysis = CLTV(inFile)
-    analysis.TopXSimpleLTVCustomers(topX)
+    if len(analysis.customers.keys()) > 1:
+        
+        analysis.TopXSimpleLTVCustomers(topX)
     
 if __name__ == '__main__':
     main()   
