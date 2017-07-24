@@ -1,0 +1,20 @@
+Calculate Topx Customer Live Time Value Timeframe
+Total Count OF Clients :52
+
+  ID 	Name	Expendure Vist	Weekly Visit	Customer CLTV
+1008	Anderson	$1,233.97	1	$772,829.08
+1044	Lamb	$1,233.97	1	$749,387.77
+1029	Church	$1,233.97	1	$739,105.43
+1030	Mccarty	$1,233.97	1	$720,131.99
+1022	Andrews	$1,233.97	1	$690,107.79
+
+
+Calculate Topx Customer Live Time Value Based on numbers of weeks that user already visited
+Total Count OF Clients :52
+
+  ID 	Name	Expendure Vist	Weekly Visit	Customer CLTV
+1029	Church	$1,233.97	2	$1,478,210.86
+1030	Mccarty	$1,233.97	2	$1,440,263.98
+1023	Spencer	$1,233.97	2	$1,283,324.90
+1013	Morin	$1,233.97	2	$1,274,952.25
+1010	UnKnown	$1,233.97	2	$1,099,445.13

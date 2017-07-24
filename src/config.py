@@ -13,7 +13,7 @@ class Config(object):
         if isLog == True:
             headtext = str(datetime.now()) +'\t'
 
-        f= open(outFile,"w+")
+        f= open(outFile,"a")
         if type(data) == type(str()):
             outTxt = headtext + str(data)  + '\n'
             f.writelines(outTxt)

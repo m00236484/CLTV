@@ -16,6 +16,7 @@ class CLTV(object):
         
         self.customers = {}
         self.cusLTVs = {}
+        self.cusLTVsDF ={}
         self.VisitsNo = 0
         self.ordersNo = 0
         self.badEvent = 0
@@ -135,9 +136,11 @@ class CLTV(object):
             except:    
                 cusVstWklV = 0
             wkVisit += cusVstWklV    
-            wkCustVal = vistExpe * wkVisit
+            wkCustVal = cusVstExpe * cusVstWklV
             cusLTV = 52 * wkCustVal * 10
             self.cusLTVs[key] = cusLTV
+            self.cusLTVs['cusVstExpe'] = cusVstExpe
+            self.cusLTVs['cusVstWklV'] = cusVstWklV            
         try:
             avrVistExpe  = vistExpe /  cusCount
         except:    
@@ -171,6 +174,7 @@ class CLTV(object):
             #print self.customers.get(key).totExpend
             try:
                 cusVstExpe = self.customers.get(key).totExpend / self.customers.get(key).cntVisit
+                
             except:    
                 cusVstExpe = 0
                 
@@ -188,11 +192,16 @@ class CLTV(object):
                 cusVstWklV = self.customers.get(key).cntVisit / Weeks
             except:    
                 cusVstWklV = 0 
-          
+            
             wkVisit += cusVstWklV  
-            wkCustVal = vistExpe * wkVisit
+            wkCustVal = cusVstExpe * cusVstWklV
+        
             cusLTV = 52 * wkCustVal * 10
-            self.cusLTVs[key] = cusLTV
+            self.cusLTVsDF[key] = cusLTV
+            self.cusLTVsDF['cusVstExpe'] = cusVstExpe
+            self.cusLTVsDF['cusVstWklV'] = cusVstWklV
+            
+            
 
         try:
             avrVistExpe  = vistExpe /  cusCount
@@ -202,6 +211,7 @@ class CLTV(object):
             avrWkVisit   = wkVisit / cusCount
         except:    
             avrWkVisit = 0
+            
         avrcusLTV    = 52 * (avrVistExpe * avrWkVisit) * 10 
         
     def TopXSimpleLTVCustomers(self,x):
@@ -209,15 +219,41 @@ class CLTV(object):
         
         data = []
         topX = 0
-        if int(x) <= len(self.cusLTVs.keys()):
-            
+        
+        self.cusLTVsDF
+        customerCNT = len(self.cusLTVsDF.keys())
+        outputFile = self.conf.writeOutput(self.outFile ,'Calculate Topx Customer Live Time Value Timeframe')
+        outputFile = self.conf.writeOutput(self.outFile ,'Total Count OF Clients :' + str(customerCNT) + '\n')
+        
+         
+        if int(x) <= customerCNT:
             topX = x
         else:
-            topX = len(self.cusLTVs.keys())
-            print('Requested Top Clients > Count of Clients')
+            topX = customerCNT
+        self.conf.writeOutput(self.outFile ,'  ID ' + '\t' + 'Name' + '\t' +  'Expendure Vist'+ '\t'+'Weekly Visit'+ '\t'  + 'Customer CLTV')
+        for w in sorted(self.cusLTVsDF, key=self.cusLTVsDF.get, reverse=True)[:int(topX)]:
+           
+            
+            datao = str(w) + "\t"+ str(self.customers.get(w).surname) + "\t" +str( '${:,.2f}'.format(self.cusLTVsDF['cusVstExpe']) )+'\t'+str(self.cusLTVsDF['cusVstWklV'] )+ '\t'+ str('${:,.2f}'.format(self.cusLTVsDF[w]))
+            data.append(str(datao))
+            #print  str(self.customers.get(w).surname)  , w, self.cusLTVs[w]                    
+        outputFile = self.conf.writeOutput(self.outFile ,data)
+        
+        data = []
 
+        outputFile = self.conf.writeOutput(self.outFile , '\n' + '\n' +'Calculate Topx Customer Live Time Value Based on numbers of weeks that user already visited')
+        outputFile = self.conf.writeOutput(self.outFile ,'Total Count OF Clients :' + str(customerCNT))
+
+        customerCNT = len(self.cusLTVs.keys())
+        if int(x) <= customerCNT:
+            topX = x
+        else:
+            topX = customerCNT
+
+        self.conf.writeOutput(self.outFile , '\n'+'  ID ' + '\t' + 'Name' + '\t' +  'Expendure Vist'+ '\t'+'Weekly Visit'+ '\t'  + 'Customer CLTV') 
         for w in sorted(self.cusLTVs, key=self.cusLTVs.get, reverse=True)[:int(topX)]:
-            datao = str(w) + "\t"+ str(self.customers.get(w).surname) + "\t" + str('${:,.2f}'.format(self.cusLTVs[w]))
+            datao = str(w) + "\t"+ str(self.customers.get(w).surname) + "\t" +str( '${:,.2f}'.format(self.cusLTVs['cusVstExpe']) )+'\t'+str(self.cusLTVs['cusVstWklV'] )+ '\t'+ str('${:,.2f}'.format(self.cusLTVs[w]))
+            
             data.append(str(datao))
             #print  str(self.customers.get(w).surname)  , w, self.cusLTVs[w]                    
         
