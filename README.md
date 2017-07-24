@@ -5,13 +5,13 @@ Introduction
 
 Business Scenario
 	to calculate customer live time value 
-	A.	Customer LTV based on date frame  for each user. 
+	A.	Customer LTV based on date frame  for each user. (Chalange)
 		So if user A has order events in week 1 and order events in the following week 2, but user B has only order events in week 1, then user B will have see a lower average revenue as his revenue is averaged with zero revenue in week 2.
 
 	B.	Customer LTV based on count weeks that user visited or ordered. 
 		So if user A has order events in week 1 and order events in the following week 2, but user B has only order events in week 1, then user A & B will have equal average visit per week and expenditures is main factor .
 	C.	Customer Segmentation.
-		 Segment users based on CLTV to Segment A, B, C and D, as segment  A is user   	 
+		 Segment users based on CLTV to Segment A, B, C, D, and E as segment  A is group of users have CLTV perentage 130% of Average CLTV, segment B include users have percentage between 105%-125%, segment C for those users in average CLTV , segment D are those users have 80% of average, and segment E for reset of users     	 
  
 Ingest(e, D)
 

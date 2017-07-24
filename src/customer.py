@@ -18,14 +18,16 @@ class Customer(object):
         self.wkVisits = dict()
         self.wkExpend = dict()
         self.validCustData = False
+        self.segment = None
         
-
-    def setCustomere(self, data):
-        
+        self.cusLTV = 0
+        self.vstExpend = 0
+        self.wkVst = 0        
+    
+    def setCustomere(self, data):     
         if not data:
             return None
 
-        
         eType   = data.get('type')
         eAction = data.get('verb')
         eTime   = data.get('event_time') 
@@ -93,6 +95,13 @@ class Customer(object):
             self.wkExpend[eYWeek] = expen       
         
                 
+    def set_custSegment(self, seg):
+        self.segment = seg
+        
+    def set_custValue(self, cusLTV, vstExpend , wkVst):
+        self.cusLTV = cusLTV
+        self.vstExpend = vstExpend
+        self.wkVst = wkVst
         
     def set_cntVisit(self):
         self.cntVisit += 1

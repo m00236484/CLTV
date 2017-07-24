@@ -2,6 +2,8 @@ import sys
 import os
 import json
 import unittest
+import math
+import operator
 from decimal import Decimal
 import re
 from customer import Customer
@@ -30,6 +32,16 @@ class CLTV(object):
         
         # set log file to event 
         self.event.badEventFile =  self.badDataFile
+        
+        self.avrcusLTV = 0     
+        self.avrWkVisit  = 0 
+        self.avrVistExpe = 0 
+        self.avrWklyExpe = 0 
+        
+        self.avrcusLTVTF = 0     
+        self.avrWkVisitTF  = 0 
+        self.avrVistExpeTF = 0 
+        self.avrWklyExpeTF = 0 
         
         if self.loadJson(fileName):
                  
@@ -110,13 +122,7 @@ class CLTV(object):
                     self.customers.get(customer_id).set_customerVisit(eTime, eYWeek , expen )
                     self.ordersNo += 1 
               
-    def analysis1(self):
-        vistExpe = 0
-        wkVisit = 0
-        cusCount = len(self.customers.keys())
-        print cusCount
-        for key  in self.customers:
-            print self.customers.get(key).cntVisit   
+
 
     def analysis(self):
         vistExpe = 0
@@ -147,10 +153,18 @@ class CLTV(object):
             avrVistExpe = 0 
         try:
             avrWkVisit   = wkVisit / cusCount
+            
         except:    
             avrWkVisit = 0        
         
         avrcusLTV    = 52 * (avrVistExpe * avrWkVisit) * 10 
+        
+        self.avrcusLTV =avrcusLTV     
+        self.avrWkVisit  = avrWkVisit 
+        self.avrVistExpe =avrVistExpe 
+        self.avrWklyExpe = avrVistExpe * avrWkVisit 
+    
+              
     
     def dataSet_analsys(self):
         data = []
@@ -174,11 +188,8 @@ class CLTV(object):
             #print self.customers.get(key).totExpend
             try:
                 cusVstExpe = self.customers.get(key).totExpend / self.customers.get(key).cntVisit
-                
             except:    
                 cusVstExpe = 0
-                
-            
             vistExpe += cusVstExpe 
             
             firstAction = self.customers.get(key).firstAction 
@@ -186,20 +197,22 @@ class CLTV(object):
             
             try:
                 Weeks = (lastAction-firstAction).days / 7
+                weeks = math.ceil(Weeks)
             except:    
                 Weeks = 1  
+            
             try:
                 cusVstWklV = self.customers.get(key).cntVisit / Weeks
+                cusVstWklV = math.ceil(cusVstWklV)
             except:    
                 cusVstWklV = 0 
-            
+            #print  math.ceil(cusVstWklV) , '\t', cusVstWklV
             wkVisit += cusVstWklV  
-            wkCustVal = cusVstExpe * cusVstWklV
+            wkCustVal = Decimal(cusVstExpe) * Decimal(cusVstWklV)
         
             cusLTV = 52 * wkCustVal * 10
-            self.cusLTVsDF[key] = cusLTV
-            self.cusLTVsDF['cusVstExpe'] = cusVstExpe
-            self.cusLTVsDF['cusVstWklV'] = cusVstWklV
+          
+            self.customers.get(key).set_custValue(cusLTV, cusVstExpe , cusVstWklV )
             
             
 
@@ -208,12 +221,70 @@ class CLTV(object):
         except:    
             avrVistExpe = 0 
         try:
-            avrWkVisit   = wkVisit / cusCount
+            avrWkVisit   = round(wkVisit / cusCount)
         except:    
             avrWkVisit = 0
+     
             
-        avrcusLTV    = 52 * (avrVistExpe * avrWkVisit) * 10 
+        avrWklyExpeTF  = Decimal(avrVistExpe) * Decimal(avrWkVisit)
+        avrcusLTV    = 52 * avrWklyExpeTF * 10 
+       
         
+        self.avrcusLTVTF = avrcusLTV     
+        self.avrWkVisitTF  = avrWkVisit 
+        self.avrVistExpeTF = avrVistExpe 
+        self.avrWklyExpeTF = Decimal(avrVistExpe) * Decimal(avrWkVisit)  
+        
+    def custSegmentation(self):
+        avrCLTV = self.avrcusLTVTF
+        oldSeg = ''
+        newSeg = ''
+        cnt = 0 
+        flag = False 
+        customerCnt = len(self.customers.keys())
+        self.conf.writeOutput(self.outFile ,'\n'+'--------------------------------------------------------------------------------------') 
+        self.conf.writeOutput(self.outFile ,'C-' +'\t' +'Customer Segmentation Based on Customer Lifetime Value ' + '\n')
+        
+        self.conf.writeOutput(self.outFile ,'  ID ' + '\t' + 'Name' + '\t' + 'Customer Segment' +'\n')
+        
+        for customer in (sorted(self.customers.values(), key=operator.attrgetter('cusLTV'), reverse=True)):
+            cusval =  round(((customer.cusLTV / avrCLTV) * 100 ))
+            if  cusval > 130 :
+                newSeg = 'A'
+                self.customers.get(customer.key).set_custSegment('A')
+            elif  cusval >= 105 and cusval < 130 : 
+                newSeg = 'B'
+                self.customers.get(customer.key).set_custSegment('B')
+            elif  cusval >= 90 and cusval < 105 : 
+                newSeg = 'C'
+                self.customers.get(customer.key).set_custSegment('C')                
+            elif  cusval >= 80 and cusval < 90 : 
+                newSeg = 'D'
+                self.customers.get(customer.key).set_custSegment('D')                
+            else:
+                newSeg = 'E'
+                self.customers.get(customer.key).set_custSegment('E')                
+            
+            if oldSeg == newSeg:
+                cnt +=1
+                self.conf.writeOutput(self.outFile ,str(customer.key) + '\t' + str(customer.surname) + '\t' + str(customer.segment))
+            else:
+  
+                try:
+                    
+                    prec = math.ceil( (cnt * 100 ) / customerCnt)  
+
+                except:
+                    prec = 0
+                #print prec 
+                if flag:
+                    self.conf.writeOutput(self.outFile ,'Total Customer in  Segment  ' + oldSeg + ' Is  : ' + str(cnt) + '   Precentage : ' +str('{:}%'.format(prec))  )
+                self.conf.writeOutput(self.outFile ,'\n'+'------------------ Segment '+ newSeg +'  ----------------------')                 
+                self.conf.writeOutput(self.outFile ,str(customer.key) + '\t' + str(customer.surname) + '\t' + str(customer.segment))
+                cnt = 0
+                flag = True 
+                oldSeg = newSeg
+            
     def TopXSimpleLTVCustomers(self,x):
        #outputFile = conf.set_outFile('outpu')
         
@@ -221,35 +292,52 @@ class CLTV(object):
         topX = 0
         
         self.cusLTVsDF
-        customerCNT = len(self.cusLTVsDF.keys())
-        outputFile = self.conf.writeOutput(self.outFile ,'Calculate Topx Customer Live Time Value Timeframe')
-        outputFile = self.conf.writeOutput(self.outFile ,'Total Count OF Clients :' + str(customerCNT) + '\n')
+        customerCNT = len(self.customers.keys())
+        self.conf.writeOutput(self.outFile ,'A-' +'\t' +'Calculate Topx Customer Lifetime Value Timeframe')
+        self.conf.writeOutput(self.outFile ,'Total Count OF Clients               :' + str(customerCNT) )
+        self.conf.writeOutput(self.outFile ,'Averge Customers CLTV                :' + str('${:,.2f}'.format(self.avrcusLTVTF )) )
+        self.conf.writeOutput(self.outFile ,'Averge Customers Weekly Visit        :' + str('{:}'.format(self.avrWkVisitTF )) )
+        self.conf.writeOutput(self.outFile ,'Averge Customers Visit  Expenditure  :' + str('${:,.2f}'.format(self.avrVistExpeTF )) )
+        self.conf.writeOutput(self.outFile ,'Averge Customers Weekly Expenditure  :' + str('${:,.2f}'.format(self.avrWklyExpeTF )) + '\n')
         
-         
+    
+  
+        
         if int(x) <= customerCNT:
             topX = x
         else:
             topX = customerCNT
+       
+        #for w in (sorted(self.customers.values(), key=operator.attrgetter('cusLTV'), reverse=True)):
+        #    print w.key , w.cusLTV
+  
+        count = 1
         self.conf.writeOutput(self.outFile ,'  ID ' + '\t' + 'Name' + '\t' +  'Expendure Vist'+ '\t'+'Weekly Visit'+ '\t'  + 'Customer CLTV')
-        for w in sorted(self.cusLTVsDF, key=self.cusLTVsDF.get, reverse=True)[:int(topX)]:
-           
+        for x in (sorted(self.customers.values(), key=operator.attrgetter('cusLTV'), reverse=True)):
+            w = x.key 
+            cusLTVsDF =self.customers.get(w).cusLTV
+            wkVst     =self.customers.get(w).wkVst
+            vstExpend     =self.customers.get(w).vstExpend
             
-            datao = str(w) + "\t"+ str(self.customers.get(w).surname) + "\t" +str( '${:,.2f}'.format(self.cusLTVsDF['cusVstExpe']) )+'\t'+str(self.cusLTVsDF['cusVstWklV'] )+ '\t'+ str('${:,.2f}'.format(self.cusLTVsDF[w]))
+            datao = str(w) + "\t"+ str(self.customers.get(w).surname) + "\t" +str( '${:,.2f}'.format(vstExpend) )+'\t'+str(wkVst)+ '\t'+ str('${:,.2f}'.format(cusLTVsDF))
             data.append(str(datao))
-            #print  str(self.customers.get(w).surname)  , w, self.cusLTVs[w]                    
+            #print  str(self.customers.get(w).surname)  , w, self.cusLTVs[w]
+            if int(topX) == count:
+                break
+            else:
+                count += 1 
+            
         outputFile = self.conf.writeOutput(self.outFile ,data)
         
         data = []
-
-        outputFile = self.conf.writeOutput(self.outFile , '\n' + '\n' +'Calculate Topx Customer Live Time Value Based on numbers of weeks that user already visited')
-        outputFile = self.conf.writeOutput(self.outFile ,'Total Count OF Clients :' + str(customerCNT))
-
-        customerCNT = len(self.cusLTVs.keys())
-        if int(x) <= customerCNT:
-            topX = x
-        else:
-            topX = customerCNT
-
+        self.conf.writeOutput(self.outFile ,'--------------------------------------------------------------------------------------')    
+        self.conf.writeOutput(self.outFile , '\n' + '\n' +'B-' +'\t'+'Calculate Topx Customer Live Time Value Based on numbers of weeks that user already visited')
+        self.conf.writeOutput(self.outFile ,'Total Count OF Clients  :' + str(customerCNT))    
+        self.conf.writeOutput(self.outFile ,'Averge Customers CLTV                :' + str('${:,.2f}'.format(self.avrcusLTV )) )
+        self.conf.writeOutput(self.outFile ,'Averge Customers Weekly Visit        :' + str('{:}'.format(self.avrWkVisit )) )
+        self.conf.writeOutput(self.outFile ,'Averge Customers Visit  Expenditure  :' + str('${:,.2f}'.format(self.avrVistExpe )) )
+        self.conf.writeOutput(self.outFile ,'Averge Customers Weekly Expenditure  :' + str('${:,.2f}'.format(self.avrWklyExpe )) + '\n')
+        
         self.conf.writeOutput(self.outFile , '\n'+'  ID ' + '\t' + 'Name' + '\t' +  'Expendure Vist'+ '\t'+'Weekly Visit'+ '\t'  + 'Customer CLTV') 
         for w in sorted(self.cusLTVs, key=self.cusLTVs.get, reverse=True)[:int(topX)]:
             datao = str(w) + "\t"+ str(self.customers.get(w).surname) + "\t" +str( '${:,.2f}'.format(self.cusLTVs['cusVstExpe']) )+'\t'+str(self.cusLTVs['cusVstWklV'] )+ '\t'+ str('${:,.2f}'.format(self.cusLTVs[w]))
@@ -278,6 +366,7 @@ def main():
     if len(analysis.customers.keys()) > 1:
         
         analysis.TopXSimpleLTVCustomers(topX)
+        analysis.custSegmentation()
     
 if __name__ == '__main__':
     main()   
