@@ -105,7 +105,9 @@ class Customer(object):
         
     def set_cntVisit(self):
         self.cntVisit += 1
-        
+    def get_cusLTV(self):
+        return self.cusLTV
+    
     def set_totExpend(self, amount):
         self.totExpend += amount
         

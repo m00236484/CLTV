@@ -1,0 +1,1 @@
+2017-07-24 04:46:16.273000	Success to read json file : D:\Projects\CLTV\input\ds50Customers.txt

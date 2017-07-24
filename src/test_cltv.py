@@ -16,8 +16,5 @@ class CLTVTestCase(unittest.TestCase):
             shortened_msg = (msg[:100]+'...' if len(msg)>100 else msg)
             raise self.failureException(shortened_msg)        
             
-if __name__ == '__main__':
-
-    
-    
+if __name__ == '__main__':    
     unittest.main()

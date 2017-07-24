@@ -1,0 +1,100 @@
+A-	Calculate Topx Customer Lifetime Value Timeframe
+Total Count OF Clients               :50
+Averge Customers CLTV                :$546,199.36
+Averge Customers Weekly Visit        :1.0
+Averge Customers Visit  Expenditure  :$1,050.38
+Averge Customers Weekly Expenditure  :$1,050.38
+
+  ID 	Name	Expendure Vist	Weekly Visit	Customer CLTV
+1008	Anderson	$1,486.21	1.0	$772,829.08
+1044	Lamb	$1,441.13	1.0	$749,387.77
+1029	Church	$1,421.36	1.0	$739,105.43
+1030	Mccarty	$1,384.87	1.0	$720,131.99
+1022	Andrews	$1,327.13	1.0	$690,107.79
+--------------------------------------------------------------------------------------
+
+
+B-	Calculate Topx Customer Live Time Value Based on numbers of weeks that user already visited
+Total Count OF Clients  :50
+Averge Customers CLTV                :$546,199.36
+Averge Customers Weekly Visit        :1
+Averge Customers Visit  Expenditure  :$1,050.38
+Averge Customers Weekly Expenditure  :$1,050.38
+
+
+  ID 	Name	Expendure Vist	Weekly Visit	Customer CLTV
+1029	Church	$1,233.97	2	$1,478,210.86
+1030	Mccarty	$1,233.97	2	$1,440,263.98
+1023	Spencer	$1,233.97	2	$1,283,324.90
+1013	Morin	$1,233.97	2	$1,274,952.25
+1010	UnKnown	$1,233.97	2	$1,099,445.13
+
+--------------------------------------------------------------------------------------
+C-	Customer Segmentation Based on Customer Lifetime Value 
+
+  ID 	Name	Customer Segment
+
+
+------------------ Segment A  ----------------------
+1008	Anderson	A
+1044	Lamb	A
+1029	Church	A
+1030	Mccarty	A
+Total Customer in  Segment  A Is  : 3   Precentage : 6.0%
+
+------------------ Segment B  ----------------------
+1022	Andrews	B
+1011	UnKnown	B
+1028	Hyde	B
+1025	Mendoza	B
+1033	Turner	B
+1023	Spencer	B
+1013	Morin	B
+1016	Holman	B
+1035	Johns	B
+1026	Kennedy	B
+1045	Underwood	B
+1003	Cochran	B
+1001	UnKnown	B
+1048	UnKnown	B
+1021	Mills	B
+1017	Talley	B
+1031	Mitchell	B
+1019	UnKnown	B
+1020	UnKnown	B
+1027	Kent	B
+1009	Phillips	B
+Total Customer in  Segment  B Is  : 20   Precentage : 40.0%
+
+------------------ Segment C  ----------------------
+1010	UnKnown	C
+1038	UnKnown	C
+1002	Walters	C
+1042	Taylor	C
+1018	Mcgowan	C
+1041	UnKnown	C
+1046	Hester	C
+1014	Hensley	C
+1043	Bean	C
+1015	UnKnown	C
+1005	UnKnown	C
+1006	UnKnown	C
+Total Customer in  Segment  C Is  : 11   Precentage : 22.0%
+
+------------------ Segment D  ----------------------
+1007	Gould	D
+1032	UnKnown	D
+1037	UnKnown	D
+1036	Campbell	D
+1039	Farrell	D
+Total Customer in  Segment  D Is  : 4   Precentage : 8.0%
+
+------------------ Segment E  ----------------------
+1047	Whitehead	E
+1034	Short	E
+1004	UnKnown	E
+1012	Potter	E
+1049	UnKnown	E
+1024	Forbes	E
+1040	UnKnown	E
+1000	Shields	E

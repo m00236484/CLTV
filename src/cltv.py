@@ -83,7 +83,6 @@ class CLTV(object):
         self.conf.writeOutput(self.logFile , 'Success to read json file : ' + fileName , True )
         return True
     def ingest(self, event):
-
         data = self.event.getEventData(event)
         self.events += 1
         if not data:
